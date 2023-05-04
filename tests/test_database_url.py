@@ -74,7 +74,7 @@ def test_replace_database_url_components():
     u = DatabaseURL("postgresql://localhost/mydatabase")
 
     assert u.database == "mydatabase"
-    new = u.replace(database="test_" + u.database)
+    new = u.replace(database=f"test_{u.database}")
     assert new.database == "test_mydatabase"
     assert str(new) == "postgresql://localhost/test_mydatabase"
 
@@ -93,12 +93,12 @@ def test_replace_database_url_components():
 
     u = DatabaseURL("sqlite:///mydatabase")
     assert u.database == "mydatabase"
-    new = u.replace(database="test_" + u.database)
+    new = u.replace(database=f"test_{u.database}")
     assert new.database == "test_mydatabase"
     assert str(new) == "sqlite:///test_mydatabase"
 
     u = DatabaseURL("sqlite:////absolute/path")
     assert u.database == "/absolute/path"
-    new = u.replace(database=u.database + "_test")
+    new = u.replace(database=f"{u.database}_test")
     assert new.database == "/absolute/path_test"
     assert str(new) == "sqlite:////absolute/path_test"

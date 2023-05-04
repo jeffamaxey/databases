@@ -152,9 +152,7 @@ class MySQLConnection(ConnectionBackend):
         cursor = await self._connection.cursor()
         try:
             await cursor.execute(query_str, args)
-            if cursor.lastrowid == 0:
-                return cursor.rowcount
-            return cursor.lastrowid
+            return cursor.rowcount if cursor.lastrowid == 0 else cursor.lastrowid
         finally:
             await cursor.close()
 

@@ -58,7 +58,7 @@ class PostgresBackend(DatabaseBackend):
         if ssl is not None:
             kwargs["ssl"] = {"true": True, "false": False}[ssl.lower()]
 
-        kwargs.update(self._options)
+        kwargs |= self._options
 
         return kwargs
 
@@ -71,7 +71,7 @@ class PostgresBackend(DatabaseBackend):
             password=self._database_url.password,
             database=self._database_url.database,
         )
-        kwargs.update(self._get_connection_kwargs())
+        kwargs |= self._get_connection_kwargs()
         self._pool = await asyncpg.create_pool(**kwargs)
 
     async def disconnect(self) -> None:
@@ -145,9 +145,7 @@ class Record(RecordInterface):
         raw = self._row[idx]
         processor = datatype._cached_result_processor(self._dialect, None)
 
-        if processor is not None:
-            return processor(raw)
-        return raw
+        return processor(raw) if processor is not None else raw
 
     def __iter__(self) -> typing.Iterator:
         return iter(self._row.keys())
@@ -208,9 +206,7 @@ class PostgresConnection(ConnectionBackend):
         # https://github.com/encode/databases/pull/132
         # https://github.com/encode/databases/pull/246
         row = await self.fetch_one(query)
-        if row is None:
-            return None
-        return row[column]
+        return None if row is None else row[column]
 
     async def execute(self, query: ClauseElement) -> typing.Any:
         assert self._connection is not None, "Connection is not acquired"
@@ -247,7 +243,8 @@ class PostgresConnection(ConnectionBackend):
             compiled_params = sorted(compiled.params.items())
 
             mapping = {
-                key: "$" + str(i) for i, (key, _) in enumerate(compiled_params, start=1)
+                key: f"${str(i)}"
+                for i, (key, _) in enumerate(compiled_params, start=1)
             }
             compiled_query = compiled.string % mapping
 

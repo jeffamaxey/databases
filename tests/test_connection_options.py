@@ -29,7 +29,7 @@ async def test_postgres_pool_size_connect():
     for url in DATABASE_URLS:
         if DatabaseURL(url).dialect != "postgresql":
             continue
-        backend = PostgresBackend(url + "?min_size=1&max_size=20")
+        backend = PostgresBackend(f"{url}?min_size=1&max_size=20")
         await backend.connect()
         await backend.disconnect()
 

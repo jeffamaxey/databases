@@ -1165,17 +1165,13 @@ async def test_posgres_interface(database_url):
             result = await database.fetch_one(query=query)
 
             with pytest.warns(
-                DeprecationWarning,
-                match=re.escape(
-                    "The `Row.keys()` method is deprecated to mimic SQLAlchemy behaviour, "
-                    "use `Row._mapping.keys()` instead."
-                ),
-            ):
-                assert (
-                    list(result.keys())
-                    == [k for k in result]
-                    == ["id", "text", "completed"]
-                )
+                            DeprecationWarning,
+                            match=re.escape(
+                                "The `Row.keys()` method is deprecated to mimic SQLAlchemy behaviour, "
+                                "use `Row._mapping.keys()` instead."
+                            ),
+                        ):
+                assert list(result.keys()) == list(result) == ["id", "text", "completed"]
 
             with pytest.warns(
                 DeprecationWarning,
